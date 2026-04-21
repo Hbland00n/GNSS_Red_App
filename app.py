@@ -1,13 +1,31 @@
 from flask import Flask, jsonify, render_template
 from utils.calculations import encontrar_estaciones_cercanas, tiempo_georreferenciacion
+from pathlib import Path
 import json
-import os
+
+BASE_DIR = Path(__file__).resolve().parent
 
 app = Flask(__name__)
 
 
+def buscar_archivo(*rutas_posibles):
+    for ruta_relativa in rutas_posibles:
+        ruta = BASE_DIR / ruta_relativa
+        if ruta.exists():
+            return ruta
+    raise FileNotFoundError(
+        "No se encontró ninguno de estos archivos: "
+        + ", ".join(str(BASE_DIR / r) for r in rutas_posibles)
+    )
+
+
 def cargar_geojson_magna():
-    ruta = os.path.join("static", "data", "red_magna_eco.geojson")
+    ruta = buscar_archivo(
+        Path("static/data/red_magna_eco.geojson"),
+        Path("static/Data/red_magna_eco.geojson"),
+        Path("Static/data/red_magna_eco.geojson"),
+        Path("Static/Data/red_magna_eco.geojson"),
+    )
 
     with open(ruta, "r", encoding="utf-8") as f:
         datos = json.load(f)
@@ -52,7 +70,12 @@ def cargar_geojson_magna():
 
 
 def cargar_geojson_sgc():
-    ruta = os.path.join("static", "data", "orden1_sgc.geojson")
+    ruta = buscar_archivo(
+        Path("static/data/orden1_sgc.geojson"),
+        Path("static/Data/orden1_sgc.geojson"),
+        Path("Static/data/orden1_sgc.geojson"),
+        Path("Static/Data/orden1_sgc.geojson"),
+    )
 
     with open(ruta, "r", encoding="utf-8") as f:
         datos = json.load(f)
