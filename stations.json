@@ -1,0 +1,35 @@
+[
+  {
+    "codigo": "AEDO",
+    "nombre": "AEDO",
+    "lat": 4.5339,
+    "lon": -75.6811,
+    "municipio": "Armenia",
+    "departamento": "Quindío",
+    "estado": "Activa",
+    "contribuyente": "IGAC",
+    "rinex": true
+  },
+  {
+    "codigo": "ABCC",
+    "nombre": "ABCC",
+    "lat": 4.60971,
+    "lon": -74.08175,
+    "municipio": "Bogotá",
+    "departamento": "Bogotá D.C.",
+    "estado": "Activa",
+    "contribuyente": "IGAC",
+    "rinex": true
+  },
+  {
+    "codigo": "CALI",
+    "nombre": "CALI",
+    "lat": 3.4516,
+    "lon": -76.5320,
+    "municipio": "Cali",
+    "departamento": "Valle del Cauca",
+    "estado": "Activa",
+    "contribuyente": "IGAC",
+    "rinex": true
+  }
+]
