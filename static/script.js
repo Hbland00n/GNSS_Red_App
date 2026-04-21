@@ -63,7 +63,7 @@ function iconoTrianguloAzul() {
 }
 
 function cargarCapas() {
-    fetch("/static/data/red_magna_eco.geojson")
+    fetch("/static/Data/red_magna_eco.geojson")
         .then(response => {
             if (!response.ok) {
                 throw new Error("No se pudo cargar red_magna_eco.geojson");
@@ -88,7 +88,7 @@ function cargarCapas() {
         })
         .catch(error => console.error("Error MAGNA:", error));
 
-    fetch("/static/data/orden1_sgc.geojson")
+    fetch("/static/Data/orden1_sgc.geojson")
         .then(response => {
             if (!response.ok) {
                 throw new Error("No se pudo cargar orden1_sgc.geojson");
