@@ -15,31 +15,22 @@ function usarUbicacion() {
     );
 }
 
-// Crear mapa
 const map = L.map("map").setView([4.5709, -74.2973], 6);
 
-// Fondo satelital
 L.tileLayer(
     "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    {
-        attribution: "© Esri"
-    }
+    { attribution: "© Esri" }
 ).addTo(map);
 
-// Etiquetas
 L.tileLayer(
     "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-    {
-        attribution: "© Esri"
-    }
+    { attribution: "© Esri" }
 ).addTo(map);
 
-// Variables para resaltar cálculo
 let marcadorConsulta = null;
 let lineasCalculo = [];
 let marcadoresCalculo = [];
 
-// Limpiar cálculo anterior
 function limpiarCalculo() {
     if (marcadorConsulta) {
         map.removeLayer(marcadorConsulta);
@@ -53,7 +44,6 @@ function limpiarCalculo() {
     marcadoresCalculo = [];
 }
 
-// Iconos
 function iconoTrianguloRojo() {
     return L.divIcon({
         className: "icono-magna",
@@ -72,56 +62,58 @@ function iconoTrianguloAzul() {
     });
 }
 
-// Cargar MAGNA-ECO
-fetch("/static/data/red_magna_eco.geojson")
-    .then(response => response.json())
-    .then(data => {
-        const capaMagna = L.geoJSON(data, {
-            pointToLayer: function (feature, latlng) {
-                return L.marker(latlng, { icon: iconoTrianguloRojo() });
-            },
-            onEachFeature: function (feature, layer) {
-                const p = feature.properties || {};
-
-                layer.bindPopup(`
-                    <b>MAGNA-ECO</b><br>
-                    Código: ${p.MRTNomencl || p.mrtnomencl || p.codigo || "Sin dato"}<br>
-                    Municipio: ${p.MDANMNombr || p.mdanmnombr || p.municipio || "Sin dato"}<br>
-                    Departamento: ${p.DeNombre || p.denombre || p.departamento || "Sin dato"}<br>
-                    Estado: ${(p.MRTEstado ?? p.mrtestado ?? p.estado) == 1 ? "Activa" : ((p.MRTEstado ?? p.mrtestado ?? p.estado) == 0 ? "Inactiva" : (p.estado || "Sin dato"))}
-                `);
+function cargarCapas() {
+    fetch("/static/data/red_magna_eco.geojson")
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("No se pudo cargar red_magna_eco.geojson");
             }
-        }).addTo(map);
+            return response.json();
+        })
+        .then(data => {
+            console.log("MAGNA cargado:", data);
 
-        map.fitBounds(capaMagna.getBounds());
-    })
-    .catch(error => {
-        console.error("Error cargando red_magna_eco.geojson:", error);
-    });
+            L.geoJSON(data, {
+                pointToLayer: function (feature, latlng) {
+                    return L.marker(latlng, { icon: iconoTrianguloRojo() });
+                },
+                onEachFeature: function (feature, layer) {
+                    const p = feature.properties || {};
+                    layer.bindPopup(`
+                        <b>MAGNA-ECO</b><br>
+                        Código: ${p.MRTNomencl || p.mrtnomencl || p.codigo || "Sin dato"}
+                    `);
+                }
+            }).addTo(map);
+        })
+        .catch(error => console.error("Error MAGNA:", error));
 
-// Cargar Orden 1 SGC
-fetch("/static/data/orden1_sgc.geojson")
-    .then(response => response.json())
-    .then(data => {
-        L.geoJSON(data, {
-            pointToLayer: function (feature, latlng) {
-                return L.marker(latlng, { icon: iconoTrianguloAzul() });
-            },
-            onEachFeature: function (feature, layer) {
-                const p = feature.properties || {};
-
-                layer.bindPopup(`
-                    <b>Orden 1 SGC</b><br>
-                    Nombre: ${p.Name || p.NAME || p.nombre || p.NOMBRE || "Sin dato"}
-                `);
+    fetch("/static/data/orden1_sgc.geojson")
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("No se pudo cargar orden1_sgc.geojson");
             }
-        }).addTo(map);
-    })
-    .catch(error => {
-        console.error("Error cargando orden1_sgc.geojson:", error);
-    });
+            return response.json();
+        })
+        .then(data => {
+            console.log("SGC cargado:", data);
 
-// Leyenda
+            L.geoJSON(data, {
+                pointToLayer: function (feature, latlng) {
+                    return L.marker(latlng, { icon: iconoTrianguloAzul() });
+                },
+                onEachFeature: function (feature, layer) {
+                    const p = feature.properties || {};
+                    layer.bindPopup(`
+                        <b>Orden 1 SGC</b><br>
+                        Nombre: ${p.Name || p.NAME || p.nombre || p.NOMBRE || "Sin dato"}
+                    `);
+                }
+            }).addTo(map);
+        })
+        .catch(error => console.error("Error SGC:", error));
+}
+
 const legend = L.control({ position: "bottomright" });
 
 legend.onAdd = function () {
@@ -138,7 +130,6 @@ legend.onAdd = function () {
 
 legend.addTo(map);
 
-// Selección con clic en mapa
 map.on("click", function (e) {
     const lat = e.latlng.lat;
     const lon = e.latlng.lng;
@@ -159,7 +150,6 @@ map.on("click", function (e) {
     }).addTo(map).bindPopup("Punto de consulta seleccionado en el mapa").openPopup();
 });
 
-// Calcular
 async function calcular() {
     const lat = document.getElementById("latitud").value;
     const lon = document.getElementById("longitud").value;
@@ -210,12 +200,7 @@ async function calcular() {
                 fillColor: "#00ffcc",
                 fillOpacity: 0.9,
                 weight: 2
-            }).addTo(map).bindPopup(`
-                <b>${est.codigo}</b><br>
-                Red: ${est.red}<br>
-                Distancia: ${est.distancia} km<br>
-                Tiempo: ${est.tiempo_min} min
-            `);
+            }).addTo(map);
 
             marcadoresCalculo.push(marcador);
 
@@ -235,3 +220,5 @@ async function calcular() {
 
     document.getElementById("resultado").innerHTML = html;
 }
+
+cargarCapas();
